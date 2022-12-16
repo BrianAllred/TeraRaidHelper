@@ -1,0 +1,141 @@
+﻿@page "/"
+@using RaidHelper.Data
+@inject PokemonService PokemonService
+
+<PageTitle>Tera Raid Helper</PageTitle>
+
+<h1>Tera Raid Helper</h1>
+
+<p>Select the Tera Raid type and at least one natural type (the actual type of the raid pokemon).</p>
+
+<h2>Tera Pokemon</h2>
+@if (types == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="raid-type-selectors">
+    <label for="tera-type">Choose tera type:</label>
+    <SelectList name="tera-type" id="tera-type" TItem="TypeModel" TValue="int" Data="@types.Values"
+        TextField="@((type)=>type.Name)" ValueField="@((type)=>type.Id)" @bind-SelectedValue="@selectedTeraTypeId"
+        @onchange="@OnTeraTypeSelected" />
+</div>
+    <div>
+        <label for="natural-type-one">Choose first natural type:</label>
+        <SelectList name="natural-type-one" id="natural-type-one" TItem="TypeModel" TValue="int" Data="@types.Values"
+        TextField="@((type)=>type.Name)" ValueField="@((type)=>type.Id)" @bind-SelectedValue="@selectedNaturalTypeOneId"
+        @onchange="@OnNaturalTypeOneSelected" />
+        <label for="natural-type-two">Choose second natural type:</label>
+        <SelectList name="natural-type-two" id="natural-type-two" TItem="TypeModel" TValue="int" Data="@types.Values"
+        TextField="@((type)=>type.Name)" ValueField="@((type)=>type.Id)" @bind-SelectedValue="@selectedNaturalTypeTwoId"
+        @onchange="@OnNaturalTypeTwoSelected" @bind-Disabled="@naturalTypeTwoDisabled" />
+    </div>
+}
+
+@if (recommendedOffensiveTypes == null || recommendedDefensiveTypes == null)
+{
+    <p><em>Select types above...</em></p>
+}
+else
+{
+    <div class="container">
+    <div class="type-container">
+        <div class="type-header">
+            <h2>Recommended Offensive Types</h2>
+        </div>
+        <div class="type-table">
+            @foreach (var type in recommendedOffensiveTypes)
+                {
+                    <div class="type-table-entry">
+                        <div class="type-icon"><img src=@("icons/" + @type.Name + ".ico") height="48" width="48"></div>
+                        <div class="type-name">@type.Name</div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="type-container">
+            <div class="type-header">
+                <h2>Recommended Defensive Types</h2>
+            </div>
+            <div class="type-table">
+                @foreach (var type in recommendedDefensiveTypes)
+                {
+                    <div class="type-table-entry">
+                        <div class="type-icon"><img src=@("icons/" + @type.Name + ".ico") height="48" width="48"></div>
+                        <div class="type-name">@type.Name</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private TypeModel[]? recommendedOffensiveTypes;
+    private TypeModel[]? recommendedDefensiveTypes;
+    private Dictionary<int, TypeModel> types = new();
+
+    private int selectedTeraTypeId;
+    private int selectedNaturalTypeOneId;
+    private int selectedNaturalTypeTwoId;
+    private bool naturalTypeTwoDisabled = true;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var typeModels = await PokemonService.GetTypesAsync();
+
+        types[0] = new TypeModel { Name = "None" };
+
+        foreach (var type in typeModels)
+        {
+            types[type.Id] = type;
+        }
+    }
+
+    protected async Task OnTeraTypeSelected(ChangeEventArgs e)
+    {
+        selectedTeraTypeId = int.Parse(e?.Value?.ToString() ?? "0");
+        await GetRecommendedOffensiveTypes();
+    }
+
+    protected async Task OnNaturalTypeOneSelected(ChangeEventArgs e)
+    {
+        selectedNaturalTypeOneId = int.Parse(e?.Value?.ToString() ?? "0");
+        if (selectedNaturalTypeOneId == 0)
+        {
+            naturalTypeTwoDisabled = true;
+            selectedNaturalTypeTwoId = 0;
+        }
+        else
+        {
+            naturalTypeTwoDisabled = false;
+        }
+
+        await GetRecommendedDefensiveTypes();
+    }
+
+    protected async Task OnNaturalTypeTwoSelected(ChangeEventArgs e)
+    {
+        selectedNaturalTypeTwoId = int.Parse(e?.Value?.ToString() ?? "0");
+        await GetRecommendedDefensiveTypes();
+    }
+
+    private async Task GetRecommendedOffensiveTypes()
+    {
+        if (selectedTeraTypeId != 0)
+        {
+            recommendedOffensiveTypes = await PokemonService.GetGoodOffensiveTypes(types[selectedTeraTypeId]);
+        }
+    }
+
+    private async Task GetRecommendedDefensiveTypes()
+    {
+        if (selectedNaturalTypeOneId != 0)
+        {
+            recommendedDefensiveTypes = await PokemonService.GetGoodDefensiveTypes(types[selectedNaturalTypeOneId],
+            types[selectedNaturalTypeTwoId]);
+        }
+    }
+}
