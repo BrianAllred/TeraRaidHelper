@@ -12,65 +12,65 @@
 <h2>Tera Pokemon</h2>
 @if (types == null)
 {
-    <p><em>Loading...</em></p>
+        <p><em>Loading...</em></p>
 }
 else
 {
-    <div class="raid-type-selectors">
-    <label for="tera-type">Choose tera type:</label>
-    <SelectList class="type-list" name="tera-type" id="tera-type" TItem="TypeModel" TValue="int" Data="@types.Values"
+        <div class="raid-type-selectors">
+        <label for="tera-type">Choose tera type:</label>
+        <SelectList class="type-list" name="tera-type" id="tera-type" TItem="TypeModel" TValue="int" Data="@types.Values"
         TextField="@((type)=>type.Name)" ValueField="@((type)=>type.Id)" @bind-SelectedValue="@selectedTeraTypeId"
         @onchange="@OnTeraTypeSelected" />
-</div>
-    <div>
-        <label for="natural-type-one">Choose first natural type:</label>
-        <SelectList class="type-list" name="natural-type-one" id="natural-type-one" TItem="TypeModel" TValue="int" Data="@types.Values"
+    </div>
+        <div>
+            <label for="natural-type-one">Choose first natural type:</label>
+            <SelectList class="type-list" name="natural-type-one" id="natural-type-one" TItem="TypeModel" TValue="int" Data="@types.Values"
         TextField="@((type)=>type.Name)" ValueField="@((type)=>type.Id)" @bind-SelectedValue="@selectedNaturalTypeOneId"
         @onchange="@OnNaturalTypeOneSelected" />
-        <label for="natural-type-two">Choose second natural type:</label>
-        <SelectList class="type-list" name="natural-type-two" id="natural-type-two" TItem="TypeModel" TValue="int" Data="@types.Values"
+            <label for="natural-type-two">Choose second natural type:</label>
+            <SelectList class="type-list" name="natural-type-two" id="natural-type-two" TItem="TypeModel" TValue="int" Data="@types.Values"
         TextField="@((type)=>type.Name)" ValueField="@((type)=>type.Id)" @bind-SelectedValue="@selectedNaturalTypeTwoId"
         @onchange="@OnNaturalTypeTwoSelected" @bind-Disabled="@naturalTypeTwoDisabled" />
-    </div>
+        </div>
 }
 
 @if (recommendedOffensiveTypes == null || recommendedDefensiveTypes == null || notRecommendedOffensiveTypes == null || notRecommendedDefensiveTypes == null)
 {
-    <p><em>Select types above...</em></p>
+        <p><em>Select types above...</em></p>
 }
 else
 {
-    <div class="container">
-    <div class="type-container">
-        <div class="type-header">
-            <h2>Recommended Offensive Types</h2>
-        </div>
-        <div class="type-table">
-            @foreach (var type in recommendedOffensiveTypes)
-                {
-                    <div class="type-table-entry">
-                        <div class="type-icon"><img src=@("icons/" + @type.Name + ".ico") height="48" width="48"></div>
-                        <div class="type-name">@type.Name</div>
-                    </div>
-                }
-            </div>
-        </div>
+        <div class="container">
         <div class="type-container">
             <div class="type-header">
-                <h2>Recommended Defensive Types</h2>
+                <h2>Recommended Offensive Types</h2>
             </div>
             <div class="type-table">
+                @foreach (var type in recommendedOffensiveTypes)
+                {
+                            <div class="type-table-entry">
+                                <div class="type-icon"><img src=@("icons/" + @type.Name + ".ico") height="48" width="48"></div>
+                                <div class="type-name">@type.Name</div>
+                            </div>
+                }
+                </div>
+            </div>
+            <div class="type-container">
+                <div class="type-header">
+                    <h2>Recommended Defensive Types</h2>
+                </div>
+                <div class="type-table">
                 @foreach (var type in recommendedDefensiveTypes)
                 {
-                    <div class="type-table-entry">
-                        <div class="type-icon"><img src=@("icons/" + @type.Name + ".ico") height="48" width="48"></div>
-                        <div class="type-name">@type.Name</div>
-                    </div>
+                            <div class="type-table-entry">
+                                <div class="type-icon"><img src=@("icons/" + @type.Name + ".ico") height="48" width="48"></div>
+                                <div class="type-name">@type.Name</div>
+                            </div>
                 }
+                </div>
             </div>
         </div>
-    </div>
-    <div class="container">
+        <div class="container">
     <div class="type-container">
         <div class="type-header">
             <h2>NOT Recommended Offensive Types</h2>
@@ -78,29 +78,29 @@ else
         <div class="type-table">
             @foreach (var type in notRecommendedOffensiveTypes)
                 {
-                    <div class="type-table-entry">
-                        <div class="type-icon"><img src=@("icons/" + @type.Name + ".ico") height="48" width="48"></div>
-                        <div class="type-name">@type.Name</div>
-                    </div>
+                            <div class="type-table-entry">
+                                <div class="type-icon"><img src=@("icons/" + @type.Name + ".ico") height="48" width="48"></div>
+                                <div class="type-name">@type.Name</div>
+                            </div>
                 }
+                </div>
             </div>
-        </div>
-        <div class="type-container">
-            <div class="type-header">
-                <h2>NOT Recommended Defensive Types</h2>
-            </div>
-            <div class="type-table">
+            <div class="type-container">
+                <div class="type-header">
+                    <h2>NOT Recommended Defensive Types</h2>
+                </div>
+                <div class="type-table">
                 @foreach (var type in notRecommendedDefensiveTypes)
                 {
-                    <div class="type-table-entry">
-                        <div class="type-icon"><img src=@("icons/" + @type.Name + ".ico") height="48" width="48"></div>
-                        <div class="type-name">@type.Name</div>
-                    </div>
+                            <div class="type-table-entry">
+                                <div class="type-icon"><img src=@("icons/" + @type.Name + ".ico") height="48" width="48"></div>
+                                <div class="type-name">@type.Name</div>
+                            </div>
                 }
+                </div>
             </div>
         </div>
-    </div>
-    <div>
+        <div>
         <h2>Why?</h2>
         @((MarkupString)(offensiveExplanation ?? string.Empty))
         @((MarkupString)(defensiveExplanation ?? string.Empty))
@@ -199,8 +199,8 @@ else
         }
 
         explanationBuilder.Append($" recommended because the selected Tera type <b>{types[selectedTeraTypeId].Name}</b> takes <b>double damage</b> from ");
-        
-        if(recommendedOffensiveTypes.Length > 1)
+
+        if (recommendedOffensiveTypes.Length > 1)
         {
             explanationBuilder.Append("them. ");
         }
@@ -227,7 +227,7 @@ else
 
         var noEffectTypes = notRecommendedOffensiveTypes.Intersect(types[selectedTeraTypeId].ImmuneTo).ToArray();
 
-        if(noEffectTypes.Length > 0)
+        if (noEffectTypes.Length > 0)
         {
             explanationBuilder.Append("The offensive type");
             if (noEffectTypes.Length > 1)
@@ -239,8 +239,8 @@ else
                 explanationBuilder.Append($" <b>{noEffectTypes[0].Name}</b> is");
             }
 
-            explanationBuilder.Append($" <b>not</b> recommended because the selected Tera type <b>{types[selectedTeraTypeId].Name}</b> is takes <b>no damage</b> from ");
-            
+            explanationBuilder.Append($" <b>not</b> recommended because the selected Tera type <b>{types[selectedTeraTypeId].Name}</b> takes <b>no damage</b> from ");
+
             if (noEffectTypes.Length > 1)
             {
                 explanationBuilder.Append("them. ");
@@ -265,8 +265,8 @@ else
                 explanationBuilder.Append($" <b>{halfDamageTypes[0].Name}</b> is");
             }
 
-            explanationBuilder.Append($" <b>not</b> recommended because the selected Tera type <b>{types[selectedTeraTypeId].Name}</b> is takes <b>half damage</b> from ");
-            
+            explanationBuilder.Append($" <b>not</b> recommended because the selected Tera type <b>{types[selectedTeraTypeId].Name}</b> takes <b>half damage</b> from ");
+
             if (halfDamageTypes.Length > 1)
             {
                 explanationBuilder.Append("them. ");
@@ -303,7 +303,7 @@ else
 
         var noEffectRecommended = recommendedDefensiveTypes.Intersect(types[typeId].NoEffectAgainst).ToArray();
 
-        if(noEffectRecommended.Length > 0) 
+        if (noEffectRecommended.Length > 0)
         {
             explanationBuilder.Append("The defensive type");
             if (noEffectRecommended.Length > 1)
@@ -316,7 +316,7 @@ else
             }
 
             explanationBuilder.Append($" recommended because the selected natural type <b>{types[typeId].Name}</b> does <b>no damage</b> to ");
-            
+
             if (noEffectRecommended.Length > 1)
             {
                 explanationBuilder.Append("them. ");
@@ -343,7 +343,7 @@ else
             }
 
             explanationBuilder.Append($" recommended because the selected natural type <b>{types[typeId].Name}</b> does <b>half damage</b> to ");
-            
+
             if (notEffectiveRecommended.Length > 1)
             {
                 explanationBuilder.Append("them. ");
@@ -365,7 +365,7 @@ else
 
         var explanationBuilder = new StringBuilder();
 
-        if(typeSpecificBadDefensiveTypes.Length > 1)
+        if (typeSpecificBadDefensiveTypes.Length > 1)
         {
             explanationBuilder.Append("The defensive type");
             if (typeSpecificBadDefensiveTypes.Length > 1)
@@ -378,7 +378,7 @@ else
             }
 
             explanationBuilder.Append($" <b>not</b> recommended because the selected natural type <b>{types[typeId].Name}</b> deals <b>double damage</b> to ");
-            
+
             if (typeSpecificBadDefensiveTypes.Length > 1)
             {
                 explanationBuilder.Append("them. ");
