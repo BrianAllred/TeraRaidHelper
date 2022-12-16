@@ -31,6 +31,10 @@
   flex: 0 0 auto;
 }
 
+.type-list {
+  margin-bottom: 2rem;
+}
+
 h1,
 h2 {
   max-width: 100%;

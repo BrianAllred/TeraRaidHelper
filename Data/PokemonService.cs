@@ -29,20 +29,22 @@ public class PokemonService
         }
 
         var type = await client.GetResourceAsync<Type>(model.Id);
-        var notEffectiveAgainst = await client.GetResourceAsync(type.DamageRelations.NoDamageTo);
-        notEffectiveAgainst.AddRange(await client.GetResourceAsync(type.DamageRelations.HalfDamageTo));
+        var noEffectAgainst = await client.GetResourceAsync(type.DamageRelations.NoDamageTo);
+        var notEffectiveAgainst = await client.GetResourceAsync(type.DamageRelations.HalfDamageTo);
 
         var superEffectiveAgainst = await client.GetResourceAsync(type.DamageRelations.DoubleDamageTo);
 
         var resistantTo = await client.GetResourceAsync(type.DamageRelations.HalfDamageFrom);
-        resistantTo.AddRange(await client.GetResourceAsync(type.DamageRelations.NoDamageFrom));
+        var immuneTo = await client.GetResourceAsync(type.DamageRelations.NoDamageFrom);
 
         var weakTo = await client.GetResourceAsync(type.DamageRelations.DoubleDamageFrom);
 
         model.NotEffectiveAgainst = notEffectiveAgainst.ToModels().ToList();
+        model.NoEffectAgainst = noEffectAgainst.ToModels().ToList();
         model.ResistantTo = resistantTo.ToModels().ToList();
         model.SuperEffectiveAgainst = superEffectiveAgainst.ToModels().ToList();
         model.WeakTo = weakTo.ToModels().ToList();
+        model.ImmuneTo = immuneTo.ToModels().ToList();
 
         return model;
     }
@@ -74,7 +76,7 @@ public class PokemonService
     {
         teraType = await GetDamageRelationsAsync(teraType);
 
-        return teraType.ResistantTo.ToArray();
+        return teraType.ResistantTo.Concat(teraType.ImmuneTo).ToArray();
     }
 
     public async Task<TypeModel[]> GetGoodDefensiveTypes(TypeModel naturalTypeOne, TypeModel naturalTypeTwo)
@@ -82,7 +84,7 @@ public class PokemonService
         naturalTypeOne = await GetDamageRelationsAsync(naturalTypeOne);
         naturalTypeTwo = await GetDamageRelationsAsync(naturalTypeTwo);
 
-        var safeTypes = naturalTypeOne.NotEffectiveAgainst.Concat(naturalTypeTwo.NotEffectiveAgainst).DistinctBy(type => type.Id);
+        var safeTypes = naturalTypeOne.NotEffectiveAgainst.Concat(naturalTypeTwo.NotEffectiveAgainst).Concat(naturalTypeOne.NoEffectAgainst).Concat(naturalTypeTwo.NoEffectAgainst).DistinctBy(type => type.Id);
         var unsafeTypes = naturalTypeOne.SuperEffectiveAgainst.Concat(naturalTypeTwo.SuperEffectiveAgainst).DistinctBy(type => type.Id);
 
         return safeTypes.Except(unsafeTypes).ToArray();

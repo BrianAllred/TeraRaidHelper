@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using RaidHelper.Data
+@using System.Text
 @inject PokemonService PokemonService
 
 <PageTitle>Tera Raid Helper</PageTitle>
@@ -17,23 +18,23 @@ else
 {
     <div class="raid-type-selectors">
     <label for="tera-type">Choose tera type:</label>
-    <SelectList name="tera-type" id="tera-type" TItem="TypeModel" TValue="int" Data="@types.Values"
+    <SelectList class="type-list" name="tera-type" id="tera-type" TItem="TypeModel" TValue="int" Data="@types.Values"
         TextField="@((type)=>type.Name)" ValueField="@((type)=>type.Id)" @bind-SelectedValue="@selectedTeraTypeId"
         @onchange="@OnTeraTypeSelected" />
 </div>
     <div>
         <label for="natural-type-one">Choose first natural type:</label>
-        <SelectList name="natural-type-one" id="natural-type-one" TItem="TypeModel" TValue="int" Data="@types.Values"
+        <SelectList class="type-list" name="natural-type-one" id="natural-type-one" TItem="TypeModel" TValue="int" Data="@types.Values"
         TextField="@((type)=>type.Name)" ValueField="@((type)=>type.Id)" @bind-SelectedValue="@selectedNaturalTypeOneId"
         @onchange="@OnNaturalTypeOneSelected" />
         <label for="natural-type-two">Choose second natural type:</label>
-        <SelectList name="natural-type-two" id="natural-type-two" TItem="TypeModel" TValue="int" Data="@types.Values"
+        <SelectList class="type-list" name="natural-type-two" id="natural-type-two" TItem="TypeModel" TValue="int" Data="@types.Values"
         TextField="@((type)=>type.Name)" ValueField="@((type)=>type.Id)" @bind-SelectedValue="@selectedNaturalTypeTwoId"
         @onchange="@OnNaturalTypeTwoSelected" @bind-Disabled="@naturalTypeTwoDisabled" />
     </div>
 }
 
-@if (recommendedOffensiveTypes == null || recommendedDefensiveTypes == null)
+@if (recommendedOffensiveTypes == null || recommendedDefensiveTypes == null || notRecommendedOffensiveTypes == null || notRecommendedDefensiveTypes == null)
 {
     <p><em>Select types above...</em></p>
 }
@@ -69,16 +70,55 @@ else
             </div>
         </div>
     </div>
+    <div class="container">
+    <div class="type-container">
+        <div class="type-header">
+            <h2>NOT Recommended Offensive Types</h2>
+        </div>
+        <div class="type-table">
+            @foreach (var type in notRecommendedOffensiveTypes)
+                {
+                    <div class="type-table-entry">
+                        <div class="type-icon"><img src=@("icons/" + @type.Name + ".ico") height="48" width="48"></div>
+                        <div class="type-name">@type.Name</div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="type-container">
+            <div class="type-header">
+                <h2>NOT Recommended Defensive Types</h2>
+            </div>
+            <div class="type-table">
+                @foreach (var type in notRecommendedDefensiveTypes)
+                {
+                    <div class="type-table-entry">
+                        <div class="type-icon"><img src=@("icons/" + @type.Name + ".ico") height="48" width="48"></div>
+                        <div class="type-name">@type.Name</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div>
+        <h2>Why?</h2>
+        @((MarkupString)(offensiveExplanation ?? string.Empty))
+        @((MarkupString)(defensiveExplanation ?? string.Empty))
+    </div>
 }
 
 @code {
     private TypeModel[]? recommendedOffensiveTypes;
+    private TypeModel[]? notRecommendedOffensiveTypes;
     private TypeModel[]? recommendedDefensiveTypes;
+    private TypeModel[]? notRecommendedDefensiveTypes;
     private Dictionary<int, TypeModel> types = new();
 
     private int selectedTeraTypeId;
     private int selectedNaturalTypeOneId;
     private int selectedNaturalTypeTwoId;
+    private string? offensiveExplanation;
+    private string? defensiveExplanation;
     private bool naturalTypeTwoDisabled = true;
 
 
@@ -127,6 +167,8 @@ else
         if (selectedTeraTypeId != 0)
         {
             recommendedOffensiveTypes = await PokemonService.GetGoodOffensiveTypes(types[selectedTeraTypeId]);
+            notRecommendedOffensiveTypes = await PokemonService.GetBadOffensiveTypes(types[selectedTeraTypeId]);
+            GenerateOffensiveExplanation();
         }
     }
 
@@ -136,6 +178,217 @@ else
         {
             recommendedDefensiveTypes = await PokemonService.GetGoodDefensiveTypes(types[selectedNaturalTypeOneId],
             types[selectedNaturalTypeTwoId]);
+            notRecommendedDefensiveTypes = await PokemonService.GetBadDefensiveTypes(types[selectedNaturalTypeOneId],
+            types[selectedNaturalTypeTwoId]);
+            GenerateDefensiveExplanation();
         }
+    }
+
+    private void GenerateOffensiveExplanation()
+    {
+        if (recommendedOffensiveTypes == null) return;
+
+        var explanationBuilder = new StringBuilder("<p class='markup'>The offensive type");
+        if (recommendedOffensiveTypes.Length > 1)
+        {
+            explanationBuilder.Append($"s <b>{string.Join(", ", recommendedOffensiveTypes.Select(type => type.Name))}</b> are");
+        }
+        else
+        {
+            explanationBuilder.Append($" <b>{recommendedOffensiveTypes[0].Name}</b> is");
+        }
+
+        explanationBuilder.Append($" recommended because the selected Tera type <b>{types[selectedTeraTypeId].Name}</b> takes <b>double damage</b> from ");
+        
+        if(recommendedOffensiveTypes.Length > 1)
+        {
+            explanationBuilder.Append("them. ");
+        }
+        else
+        {
+            explanationBuilder.Append("it. ");
+        }
+
+        if (notRecommendedOffensiveTypes != null && notRecommendedOffensiveTypes.Length > 0)
+        {
+            explanationBuilder.Append(GenerateBadOffensiveExplanation());
+        }
+
+        explanationBuilder.Append(" Try to bring moves that match the recommended offensive types. For higher level raids, also try to match Pokemon types to benefit from <b><a href='https://bulbapedia.bulbagarden.net/wiki/Same-type_attack_bonus'>STAB</a></b>.");
+
+        explanationBuilder.Append("</p>");
+        offensiveExplanation = explanationBuilder.ToString();
+    }
+
+    private string GenerateBadOffensiveExplanation()
+    {
+        if (notRecommendedOffensiveTypes == null) return string.Empty;
+        var explanationBuilder = new StringBuilder();
+
+        var noEffectTypes = notRecommendedOffensiveTypes.Intersect(types[selectedTeraTypeId].ImmuneTo).ToArray();
+
+        if(noEffectTypes.Length > 0)
+        {
+            explanationBuilder.Append("The offensive type");
+            if (noEffectTypes.Length > 1)
+            {
+                explanationBuilder.Append($"s <b>{string.Join(", ", noEffectTypes.Select(type => type.Name))}</b> are");
+            }
+            else
+            {
+                explanationBuilder.Append($" <b>{noEffectTypes[0].Name}</b> is");
+            }
+
+            explanationBuilder.Append($" <b>not</b> recommended because the selected Tera type <b>{types[selectedTeraTypeId].Name}</b> is takes <b>no damage</b> from ");
+            
+            if (noEffectTypes.Length > 1)
+            {
+                explanationBuilder.Append("them. ");
+            }
+            else
+            {
+                explanationBuilder.Append("it. ");
+            }
+        }
+
+        var halfDamageTypes = notRecommendedOffensiveTypes.Intersect(types[selectedTeraTypeId].ResistantTo).ToArray();
+
+        if (halfDamageTypes.Length > 0)
+        {
+            explanationBuilder.Append("The offensive type");
+            if (halfDamageTypes.Length > 1)
+            {
+                explanationBuilder.Append($"s <b>{string.Join(", ", halfDamageTypes.Select(type => type.Name))}</b> are");
+            }
+            else
+            {
+                explanationBuilder.Append($" <b>{halfDamageTypes[0].Name}</b> is");
+            }
+
+            explanationBuilder.Append($" <b>not</b> recommended because the selected Tera type <b>{types[selectedTeraTypeId].Name}</b> is takes <b>half damage</b> from ");
+            
+            if (halfDamageTypes.Length > 1)
+            {
+                explanationBuilder.Append("them. ");
+            }
+            else
+            {
+                explanationBuilder.Append("it. ");
+            }
+        }
+
+        return explanationBuilder.ToString();
+    }
+
+    private void GenerateDefensiveExplanation()
+    {
+        if (recommendedDefensiveTypes == null) return;
+
+        var explanationBuilder = new StringBuilder("<p class='markup'>");
+
+        explanationBuilder.Append(GenerateTypeSpecificDefensiveExplanation(selectedNaturalTypeOneId));
+        explanationBuilder.Append(GenerateTypeSpecificDefensiveExplanation(selectedNaturalTypeTwoId));
+        explanationBuilder.Append(GenerateTypeSpecificBadDefensiveExplanation(selectedNaturalTypeOneId));
+        explanationBuilder.Append(GenerateTypeSpecificBadDefensiveExplanation(selectedNaturalTypeTwoId));
+
+        explanationBuilder.Append("</p>");
+        defensiveExplanation = explanationBuilder.ToString();
+    }
+
+    private string GenerateTypeSpecificDefensiveExplanation(int typeId)
+    {
+        if (recommendedDefensiveTypes == null) return string.Empty;
+
+        var explanationBuilder = new StringBuilder();
+
+        var noEffectRecommended = recommendedDefensiveTypes.Intersect(types[typeId].NoEffectAgainst).ToArray();
+
+        if(noEffectRecommended.Length > 0) 
+        {
+            explanationBuilder.Append("The defensive type");
+            if (noEffectRecommended.Length > 1)
+            {
+                explanationBuilder.Append($"s <b>{string.Join(", ", noEffectRecommended.Select(type => type.Name))}</b> are");
+            }
+            else
+            {
+                explanationBuilder.Append($" <b>{noEffectRecommended[0].Name}</b> is");
+            }
+
+            explanationBuilder.Append($" recommended because the selected natural type <b>{types[typeId].Name}</b> does <b>no damage</b> to ");
+            
+            if (noEffectRecommended.Length > 1)
+            {
+                explanationBuilder.Append("them. ");
+            }
+            else
+            {
+                explanationBuilder.Append("it. ");
+            }
+        }
+
+        var notEffectiveRecommended = recommendedDefensiveTypes.Intersect(types[typeId].NotEffectiveAgainst).ToArray();
+
+        if (notEffectiveRecommended.Length > 0)
+        {
+            explanationBuilder.Append("The defensive type");
+
+            if (notEffectiveRecommended.Length > 1)
+            {
+                explanationBuilder.Append($"s <b>{string.Join(", ", notEffectiveRecommended.Select(type => type.Name))}</b> are");
+            }
+            else
+            {
+                explanationBuilder.Append($" <b>{notEffectiveRecommended[0].Name}</b> is");
+            }
+
+            explanationBuilder.Append($" recommended because the selected natural type <b>{types[typeId].Name}</b> does <b>half damage</b> to ");
+            
+            if (notEffectiveRecommended.Length > 1)
+            {
+                explanationBuilder.Append("them. ");
+            }
+            else
+            {
+                explanationBuilder.Append("it. ");
+            }
+        }
+
+        return explanationBuilder.ToString();
+    }
+
+    private string GenerateTypeSpecificBadDefensiveExplanation(int typeId)
+    {
+        if (notRecommendedDefensiveTypes == null) return string.Empty;
+
+        var typeSpecificBadDefensiveTypes = notRecommendedDefensiveTypes.Intersect(types[typeId].SuperEffectiveAgainst).ToArray();
+
+        var explanationBuilder = new StringBuilder();
+
+        if(typeSpecificBadDefensiveTypes.Length > 1)
+        {
+            explanationBuilder.Append("The defensive type");
+            if (typeSpecificBadDefensiveTypes.Length > 1)
+            {
+                explanationBuilder.Append($"s <b>{string.Join(", ", typeSpecificBadDefensiveTypes.Select(type => type.Name))}</b> are");
+            }
+            else
+            {
+                explanationBuilder.Append($" <b>{typeSpecificBadDefensiveTypes[0].Name}</b> is");
+            }
+
+            explanationBuilder.Append($" <b>not</b> recommended because the selected natural type <b>{types[typeId].Name}</b> deals <b>double damage</b> to ");
+            
+            if (typeSpecificBadDefensiveTypes.Length > 1)
+            {
+                explanationBuilder.Append("them. ");
+            }
+            else
+            {
+                explanationBuilder.Append("it. ");
+            }
+        }
+
+        return explanationBuilder.ToString();
     }
 }
