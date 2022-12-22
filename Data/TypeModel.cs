@@ -11,6 +11,11 @@ public class TypeModel
     public List<TypeModel> ImmuneTo { get; set; } = new();
     public List<TypeModel> WeakTo { get; set; } = new();
 
+    public override string ToString()
+    {
+        return Name ?? "None";
+    }
+
     public override bool Equals(object? obj)
     {
         if (obj is not TypeModel otherTypeModel) return false;

@@ -5,106 +5,96 @@
 
 <PageTitle>Tera Raid Helper</PageTitle>
 
-<h1>Tera Raid Helper</h1>
-
-<p>Select the Tera Raid type and at least one natural type (the actual type of the raid pokemon).</p>
-
-<h2>Tera Pokemon</h2>
 @if (types == null)
 {
-        <p><em>Loading...</em></p>
+    <MudProgressCircular Color="Color.Info" Indeterminate="true" />
 }
 else
 {
-        <div class="raid-type-selectors">
-        <label for="tera-type">Choose tera type:</label>
-        <SelectList class="type-list" name="tera-type" id="tera-type" TItem="TypeModel" TValue="int" Data="@types.Values"
-        TextField="@((type)=>type.Name)" ValueField="@((type)=>type.Id)" @bind-SelectedValue="@selectedTeraTypeId"
-        @onchange="@OnTeraTypeSelected" />
-    </div>
-        <div>
-            <label for="natural-type-one">Choose first natural type:</label>
-            <SelectList class="type-list" name="natural-type-one" id="natural-type-one" TItem="TypeModel" TValue="int" Data="@types.Values"
-        TextField="@((type)=>type.Name)" ValueField="@((type)=>type.Id)" @bind-SelectedValue="@selectedNaturalTypeOneId"
-        @onchange="@OnNaturalTypeOneSelected" />
-            <label for="natural-type-two">Choose second natural type:</label>
-            <SelectList class="type-list" name="natural-type-two" id="natural-type-two" TItem="TypeModel" TValue="int" Data="@types.Values"
-        TextField="@((type)=>type.Name)" ValueField="@((type)=>type.Id)" @bind-SelectedValue="@selectedNaturalTypeTwoId"
-        @onchange="@OnNaturalTypeTwoSelected" @bind-Disabled="@naturalTypeTwoDisabled" />
-        </div>
-}
-
-@if (recommendedOffensiveTypes == null || recommendedDefensiveTypes == null || notRecommendedOffensiveTypes == null || notRecommendedDefensiveTypes == null)
-{
-        <p><em>Select types above...</em></p>
-}
-else
-{
-        <div class="container">
-        <div class="type-container">
-            <div class="type-header">
-                <h2>Recommended Offensive Types</h2>
-            </div>
-            <div class="type-table">
-                @foreach (var type in recommendedOffensiveTypes)
-                {
-                            <div class="type-table-entry">
-                                <div class="type-icon"><img src=@("icons/" + @type.Name + ".ico") height="48" width="48"></div>
-                                <div class="type-name">@type.Name</div>
-                            </div>
-                }
-                </div>
-            </div>
-            <div class="type-container">
-                <div class="type-header">
-                    <h2>Recommended Defensive Types</h2>
-                </div>
-                <div class="type-table">
-                @foreach (var type in recommendedDefensiveTypes)
-                {
-                            <div class="type-table-entry">
-                                <div class="type-icon"><img src=@("icons/" + @type.Name + ".ico") height="48" width="48"></div>
-                                <div class="type-name">@type.Name</div>
-                            </div>
-                }
-                </div>
-            </div>
-        </div>
-        <div class="container">
-    <div class="type-container">
-        <div class="type-header">
-            <h2>NOT Recommended Offensive Types</h2>
-        </div>
-        <div class="type-table">
-            @foreach (var type in notRecommendedOffensiveTypes)
-                {
-                            <div class="type-table-entry">
-                                <div class="type-icon"><img src=@("icons/" + @type.Name + ".ico") height="48" width="48"></div>
-                                <div class="type-name">@type.Name</div>
-                            </div>
-                }
-                </div>
-            </div>
-            <div class="type-container">
-                <div class="type-header">
-                    <h2>NOT Recommended Defensive Types</h2>
-                </div>
-                <div class="type-table">
-                @foreach (var type in notRecommendedDefensiveTypes)
-                {
-                            <div class="type-table-entry">
-                                <div class="type-icon"><img src=@("icons/" + @type.Name + ".ico") height="48" width="48"></div>
-                                <div class="type-name">@type.Name</div>
-                            </div>
-                }
-                </div>
-            </div>
-        </div>
-        <div>
-        <h2>Why?</h2>
-        @((MarkupString)(offensiveExplanation ?? string.Empty))
-        @((MarkupString)(defensiveExplanation ?? string.Empty))
-    </div>
+    <MudStack Justify="Justify.FlexStart" Spacing="3">
+        <MudText Typo="Typo.h2" GutterBottom="true">Tera Raid Helper</MudText>
+        <MudText Typo="Typo.body1" GutterBottom="true">Select the Tera Raid type and at least one natural type (the actual
+            type
+            of the raid pokemon).</MudText>
+        <MudAutocomplete class="mb-3" @ref=teraTypeAutocomplete T="TypeModel" Label="Tera type" SearchFunc="@TypeSearch" Clearable
+            SelectValueOnTab Dense OnClearButtonClick="OnTeraTypeClear" ValueChanged="OnTeraTypeChanged" />
+        <MudAutocomplete class="mb-3" @ref=typeOneAutocomplete T="TypeModel" Label="Natural type one" SearchFunc="@TypeSearch" Clearable
+            SelectValueOnTab Dense OnClearButtonClick="OnTypeOneClear" ValueChanged="OnTypeOneChanged" />
+        <MudAutocomplete class="mb-3" @ref=typeTwoAutocomplete T="TypeModel" Label="Natural type two" SearchFunc="@TypeSearch" Clearable
+            SelectValueOnTab Dense OnClearButtonClick="OnTypeTwoClear" ValueChanged="OnTypeTwoChanged" @bind-Disabled=@typeTwoAutocompleteDisabled />
+        @if (recommendedOffensiveTypes == null || recommendedDefensiveTypes == null || notRecommendedOffensiveTypes == null || notRecommendedDefensiveTypes == null)
+        {
+            <MudText Typo="Typo.body1">Select types above...</MudText>
+        }
+        else
+        {
+            <MudStack Justify="Justify.FlexStart" Spacing="6">
+                <MudGrid Justify="Justify.FlexStart" Spacing="6">
+                    <MudItem xs="12" md="6">
+                        <MudStack Justify="Justify.FlexStart" Spacing="3">
+                            <MudText Typo="Typo.h5">
+                                Recommended Offensive Types
+                            </MudText>
+                            @foreach (var type in recommendedOffensiveTypes)
+                            {
+                                <MudStack AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="3" Row>
+                                    <MudImage Src=@("icons/" + @type.Name + ".ico") Width="48" Height="48" />
+                                    <MudText>@type.Name</MudText>
+                                </MudStack>
+                            }
+                        </MudStack>
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudStack Justify="Justify.FlexStart" Spacing="3">
+                            <MudText Typo="Typo.h5">
+                                Recommended Defensive Types
+                            </MudText>
+                            @foreach (var type in recommendedDefensiveTypes)
+                            {
+                                <MudStack AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="3" Row>
+                                    <MudImage Src=@("icons/" + @type.Name + ".ico") Width="48" Height="48"/>
+                                    <MudText>@type.Name</MudText>
+                                </MudStack>
+                            }
+                        </MudStack>
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudStack Justify="Justify.FlexStart" Spacing="3">
+                            <MudText Typo="Typo.h5">
+                                NOT Recommended Offensive Types
+                            </MudText>
+                            @foreach (var type in notRecommendedOffensiveTypes)
+                            {
+                                <MudStack AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="3" Row>
+                                    <MudImage Src=@("icons/" + @type.Name + ".ico") Width="48" Height="48"/>
+                                    <MudText>@type.Name</MudText>
+                                </MudStack>
+                            }
+                        </MudStack>
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudStack Justify="Justify.FlexStart" Spacing="3">
+                            <MudText Typo="Typo.h5">
+                                NOT Recommended Defensive Types
+                            </MudText>
+                            @foreach (var type in notRecommendedDefensiveTypes)
+                            {
+                                <MudStack AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="3" Row>
+                                    <MudImage Src=@("icons/" + @type.Name + ".ico") Width="48" Height="48"/>
+                                    <MudText>@type.Name</MudText>
+                                </MudStack>
+                            }
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
+                <MudStack Justify="Justify.FlexStart" Spacing="3">
+                    <MudText Typo="Typo.h4">Why?</MudText>
+                    @((MarkupString)(offensiveExplanation ?? string.Empty))
+                    @((MarkupString)(defensiveExplanation ?? string.Empty))
+                </MudStack>
+            </MudStack>
+        }
+    </MudStack>
 }
 
 @code {
@@ -112,17 +102,44 @@ else
     private TypeModel[]? notRecommendedOffensiveTypes;
     private TypeModel[]? recommendedDefensiveTypes;
     private TypeModel[]? notRecommendedDefensiveTypes;
-    private Dictionary<int, TypeModel> types = new();
+    private TypeModel? selectedTeraType;
+    private TypeModel? selectedNaturalTypeOne;
+    private TypeModel? selectedNaturalTypeTwo;
 
-    private int selectedTeraTypeId;
-    private int selectedNaturalTypeOneId;
-    private int selectedNaturalTypeTwoId;
+#pragma warning disable CS8618 // refs from html
+    private MudAutocomplete<TypeModel> teraTypeAutocomplete;
+    private MudAutocomplete<TypeModel> typeOneAutocomplete;
+    private MudAutocomplete<TypeModel> typeTwoAutocomplete;
+#pragma warning disable CS8618
+
     private string? offensiveExplanation;
     private string? defensiveExplanation;
-    private bool naturalTypeTwoDisabled = true;
-
+    private Dictionary<int, TypeModel> types = new(); 
+    private bool typeTwoAutocompleteDisabled = false;
 
     protected override async Task OnInitializedAsync()
+    {
+        await LoadTypes();
+    }
+
+    private async Task<IEnumerable<TypeModel>> TypeSearch(string value)
+    {
+        if (types == null)
+        {
+            await LoadTypes();
+        }
+
+#pragma warning disable CS8602 // types literally can't be null here
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return types.Values;
+        }
+
+        return types.Values.Where(type => type.Name?.Contains(value, StringComparison.InvariantCultureIgnoreCase) ?? false);
+#pragma warning restore CS8602
+    }
+
+    private async Task LoadTypes()
     {
         var typeModels = await PokemonService.GetTypesAsync();
 
@@ -132,54 +149,82 @@ else
         {
             types[type.Id] = type;
         }
+
+        selectedTeraType = types[0];
+        selectedNaturalTypeOne = types[0];
+        selectedNaturalTypeTwo = types[0];
+
+        await teraTypeAutocomplete.SelectOption(types[0]);
+        await typeOneAutocomplete.SelectOption(types[0]);
+        await typeTwoAutocomplete.SelectOption(types[0]);
     }
 
-    protected async Task OnTeraTypeSelected(ChangeEventArgs e)
+    private void OnTeraTypeClear()
     {
-        selectedTeraTypeId = int.Parse(e?.Value?.ToString() ?? "0");
+        selectedTeraType = types[0];
+        teraTypeAutocomplete.SelectOption(selectedTeraType);
+    }
+
+    private void OnTypeOneClear()
+    {
+        selectedNaturalTypeOne = types[0];
+        typeOneAutocomplete.SelectOption(selectedNaturalTypeOne);
+    }
+
+    private void OnTypeTwoClear()
+    {
+        selectedNaturalTypeTwo = types[0];
+        typeTwoAutocomplete.SelectOption(selectedNaturalTypeTwo);
+    }
+
+    private async Task OnTeraTypeChanged(TypeModel model)
+    {
+        selectedTeraType = model;
         await GetRecommendedOffensiveTypes();
     }
 
-    protected async Task OnNaturalTypeOneSelected(ChangeEventArgs e)
+    private async Task OnTypeOneChanged(TypeModel model)
     {
-        selectedNaturalTypeOneId = int.Parse(e?.Value?.ToString() ?? "0");
-        if (selectedNaturalTypeOneId == 0)
+        selectedNaturalTypeOne = model;
+        if (selectedNaturalTypeOne == types[0])
         {
-            naturalTypeTwoDisabled = true;
-            selectedNaturalTypeTwoId = 0;
+            typeTwoAutocompleteDisabled = true;
+            await typeTwoAutocomplete.SelectOption(types[0]);
+            selectedNaturalTypeTwo = types[0];
+            return;
         }
         else
         {
-            naturalTypeTwoDisabled = false;
+            typeTwoAutocompleteDisabled = false;
         }
 
         await GetRecommendedDefensiveTypes();
     }
 
-    protected async Task OnNaturalTypeTwoSelected(ChangeEventArgs e)
+    private async Task OnTypeTwoChanged(TypeModel model)
     {
-        selectedNaturalTypeTwoId = int.Parse(e?.Value?.ToString() ?? "0");
+        selectedNaturalTypeTwo = model;
         await GetRecommendedDefensiveTypes();
     }
 
     private async Task GetRecommendedOffensiveTypes()
     {
-        if (selectedTeraTypeId != 0)
+        if (selectedTeraType != null && selectedTeraType != types[0])
         {
-            recommendedOffensiveTypes = await PokemonService.GetGoodOffensiveTypes(types[selectedTeraTypeId]);
-            notRecommendedOffensiveTypes = await PokemonService.GetBadOffensiveTypes(types[selectedTeraTypeId]);
+            recommendedOffensiveTypes = await PokemonService.GetGoodOffensiveTypes(selectedTeraType);
+            notRecommendedOffensiveTypes = await PokemonService.GetBadOffensiveTypes(selectedTeraType);
             GenerateOffensiveExplanation();
         }
     }
 
     private async Task GetRecommendedDefensiveTypes()
     {
-        if (selectedNaturalTypeOneId != 0)
+        if (selectedNaturalTypeOne != null && selectedNaturalTypeTwo != null && selectedNaturalTypeOne != types[0])
         {
-            recommendedDefensiveTypes = await PokemonService.GetGoodDefensiveTypes(types[selectedNaturalTypeOneId],
-            types[selectedNaturalTypeTwoId]);
-            notRecommendedDefensiveTypes = await PokemonService.GetBadDefensiveTypes(types[selectedNaturalTypeOneId],
-            types[selectedNaturalTypeTwoId]);
+            recommendedDefensiveTypes = await PokemonService.GetGoodDefensiveTypes(selectedNaturalTypeOne,
+            selectedNaturalTypeTwo);
+            notRecommendedDefensiveTypes = await PokemonService.GetBadDefensiveTypes(selectedNaturalTypeOne,
+            selectedNaturalTypeTwo);
             GenerateDefensiveExplanation();
         }
     }
@@ -198,7 +243,7 @@ else
             explanationBuilder.Append($" <b>{recommendedOffensiveTypes[0].Name}</b> is");
         }
 
-        explanationBuilder.Append($" recommended because the selected Tera type <b>{types[selectedTeraTypeId].Name}</b> takes <b>double damage</b> from ");
+        explanationBuilder.Append($" recommended because the selected Tera type <b>{selectedTeraType?.Name ?? string.Empty}</b> takes <b>double damage</b> from ");
 
         if (recommendedOffensiveTypes.Length > 1)
         {
@@ -225,7 +270,7 @@ else
         if (notRecommendedOffensiveTypes == null) return string.Empty;
         var explanationBuilder = new StringBuilder();
 
-        var noEffectTypes = notRecommendedOffensiveTypes.Intersect(types[selectedTeraTypeId].ImmuneTo).ToArray();
+        var noEffectTypes = notRecommendedOffensiveTypes.Intersect(selectedTeraType?.ImmuneTo ?? new()).ToArray();
 
         if (noEffectTypes.Length > 0)
         {
@@ -239,7 +284,7 @@ else
                 explanationBuilder.Append($" <b>{noEffectTypes[0].Name}</b> is");
             }
 
-            explanationBuilder.Append($" <b>not</b> recommended because the selected Tera type <b>{types[selectedTeraTypeId].Name}</b> takes <b>no damage</b> from ");
+            explanationBuilder.Append($" <b>not</b> recommended because the selected Tera type <b>{selectedTeraType?.Name ?? string.Empty}</b> takes <b>no damage</b> from ");
 
             if (noEffectTypes.Length > 1)
             {
@@ -251,7 +296,7 @@ else
             }
         }
 
-        var halfDamageTypes = notRecommendedOffensiveTypes.Intersect(types[selectedTeraTypeId].ResistantTo).ToArray();
+        var halfDamageTypes = notRecommendedOffensiveTypes.Intersect(selectedTeraType?.ResistantTo ?? new()).ToArray();
 
         if (halfDamageTypes.Length > 0)
         {
@@ -265,7 +310,7 @@ else
                 explanationBuilder.Append($" <b>{halfDamageTypes[0].Name}</b> is");
             }
 
-            explanationBuilder.Append($" <b>not</b> recommended because the selected Tera type <b>{types[selectedTeraTypeId].Name}</b> takes <b>half damage</b> from ");
+            explanationBuilder.Append($" <b>not</b> recommended because the selected Tera type <b>{selectedTeraType?.Name ?? string.Empty}</b> takes <b>half damage</b> from ");
 
             if (halfDamageTypes.Length > 1)
             {
@@ -286,10 +331,10 @@ else
 
         var explanationBuilder = new StringBuilder("<p class='markup'>");
 
-        explanationBuilder.Append(GenerateTypeSpecificDefensiveExplanation(selectedNaturalTypeOneId));
-        explanationBuilder.Append(GenerateTypeSpecificDefensiveExplanation(selectedNaturalTypeTwoId));
-        explanationBuilder.Append(GenerateTypeSpecificBadDefensiveExplanation(selectedNaturalTypeOneId));
-        explanationBuilder.Append(GenerateTypeSpecificBadDefensiveExplanation(selectedNaturalTypeTwoId));
+        explanationBuilder.Append(GenerateTypeSpecificDefensiveExplanation(selectedNaturalTypeOne?.Id ?? 0));
+        explanationBuilder.Append(GenerateTypeSpecificDefensiveExplanation(selectedNaturalTypeTwo?.Id ?? 0));
+        explanationBuilder.Append(GenerateTypeSpecificBadDefensiveExplanation(selectedNaturalTypeOne?.Id ?? 0));
+        explanationBuilder.Append(GenerateTypeSpecificBadDefensiveExplanation(selectedNaturalTypeTwo?.Id ?? 0));
 
         explanationBuilder.Append("</p>");
         defensiveExplanation = explanationBuilder.ToString();
