@@ -157,22 +157,30 @@ else
         await teraTypeAutocomplete.SelectOption(types[0]);
         await typeOneAutocomplete.SelectOption(types[0]);
         await typeTwoAutocomplete.SelectOption(types[0]);
+
+        await teraTypeAutocomplete.FocusAsync();
     }
 
     private void OnTeraTypeClear()
     {
+        if (selectedTeraType == types[0]) return;
+
         selectedTeraType = types[0];
         teraTypeAutocomplete.SelectOption(selectedTeraType);
     }
 
     private void OnTypeOneClear()
     {
+        if (selectedNaturalTypeOne == types[0]) return;
+
         selectedNaturalTypeOne = types[0];
         typeOneAutocomplete.SelectOption(selectedNaturalTypeOne);
     }
 
     private void OnTypeTwoClear()
     {
+        if (selectedNaturalTypeTwo == types[0]) return;
+
         selectedNaturalTypeTwo = types[0];
         typeTwoAutocomplete.SelectOption(selectedNaturalTypeTwo);
     }
