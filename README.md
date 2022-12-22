@@ -1,6 +1,6 @@
 # Tera Raid Helper (Pokémon Scarlet/Violet)
 
-[![Docker](https://img.shields.io/docker/pulls/brianallred/tera-raid-helper)](https://hub.docker.com/r/brianallred/tera-raid-helper/)
+[![Docker](https://img.shields.io/docker/pulls/brianallred/tera-raid-helper)](https://hub.docker.com/r/brianallred/tera-raid-helper/) [![Website](https://img.shields.io/website?url=https%3A%2F%2Fbrianallred.github.io%2FTeraRaidHelper%2F)](https://brianallred.github.io/TeraRaidHelper/)
 
 Have you ever been preparing for a Tera Raid in Scarlet/Violet and said "Wait... What am I supposed to bring to fight a Fairy Tera type Haxorus?"
 
@@ -14,11 +14,13 @@ Tera Raid Helper pulls detailed type information from [PokeAPI](https://pokeapi.
 
 It uses this information to suggest types to bring and which to avoid. For example for a Fairy Tera type Haxorus, it would suggest bringing Poison and Steel type attacks (super effective against Fairy) and avoiding bringing a Dragon type (since Haxorus is Dragon type).
 
+Tera Raid Helper uses [PokeApiNet](https://github.com/mtrdp642/PokeApiNet) internally with its default caching mechanism. This means that issues stemming from API rate limiting are unlikely since the API requests are made from each user's browser indivudally and each user is unlikely to hit the PokeAPI rate limit.
+
 ## Use it
 
 ### GitHub Pages
 
-Working on it!
+Check it out in action [here](https://brianallred.github.io/TeraRaidHelper/)!
 
 ### Self-hosted
 
