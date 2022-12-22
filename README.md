@@ -45,6 +45,8 @@ TODO:
 
 Tera Raid Helper is a Blazor WASM application, so all code is written in C#/Razor/HTML/JS/CSS, compiled ahead-of-time, and running locally on the browser.
 
+The UI is built using [MudBlazor](https://mudblazor.com).
+
 To contribute, you'll need:
 
 - .NET 7 SDK
