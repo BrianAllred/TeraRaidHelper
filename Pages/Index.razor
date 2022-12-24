@@ -5,7 +5,7 @@
 
 <PageTitle>Tera Raid Helper</PageTitle>
 
-@if (types == null)
+@if (types == null || types.Count == 0)
 {
     <MudProgressCircular Color="Color.Info" Indeterminate="true" />
 }
@@ -16,11 +16,11 @@ else
         <MudText Typo="Typo.body1" GutterBottom="true">Select the Tera Raid type and at least one natural type (the actual
             type
             of the raid pokemon).</MudText>
-        <MudAutocomplete class="mb-3" @ref=teraTypeAutocomplete T="TypeModel" Label="Tera type" SearchFunc="@TypeSearch" Clearable
+        <MudAutocomplete class="mb-3" @ref=teraTypeAutocomplete T="TypeModel" Label="Tera type" SearchFunc="@TeraTypeSearch" Clearable
             SelectValueOnTab Dense OnClearButtonClick="OnTeraTypeClear" ValueChanged="OnTeraTypeChanged" MaxItems=null />
-        <MudAutocomplete class="mb-3" @ref=typeOneAutocomplete T="TypeModel" Label="Natural type one" SearchFunc="@TypeSearch" Clearable
+        <MudAutocomplete class="mb-3" @ref=typeOneAutocomplete T="TypeModel" Label="Natural type one" SearchFunc="@NaturalTypeOneSearch" Clearable
             SelectValueOnTab Dense OnClearButtonClick="OnTypeOneClear" ValueChanged="OnTypeOneChanged" MaxItems=null />
-        <MudAutocomplete class="mb-3" @ref=typeTwoAutocomplete T="TypeModel" Label="Natural type two" SearchFunc="@TypeSearch" Clearable
+        <MudAutocomplete class="mb-3" @ref=typeTwoAutocomplete T="TypeModel" Label="Natural type two" SearchFunc="@NaturalTypeTwoSearch" Clearable
             SelectValueOnTab Dense OnClearButtonClick="OnTypeTwoClear" ValueChanged="OnTypeTwoChanged" MaxItems=null @bind-Disabled=@typeTwoAutocompleteDisabled />
         @if (recommendedOffensiveTypes == null || recommendedDefensiveTypes == null || notRecommendedOffensiveTypes == null || notRecommendedDefensiveTypes == null)
         {
@@ -116,24 +116,59 @@ else
     private string? defensiveExplanation;
     private Dictionary<int, TypeModel> types = new(); 
     private bool typeTwoAutocompleteDisabled = false;
+    private bool typesLoaded = false;
+    private bool typesRendered = false;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadTypes();
     }
 
-    private async Task<IEnumerable<TypeModel>> TypeSearch(string value)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (types == null)
+        await base.OnAfterRenderAsync(firstRender);
+        
+        if(typesLoaded && !typesRendered)
         {
-            await LoadTypes();
-        }
+            await teraTypeAutocomplete.SelectOption(types[0]);
+            await typeOneAutocomplete.SelectOption(types[0]);
+            await typeTwoAutocomplete.SelectOption(types[0]);
 
+            await teraTypeAutocomplete.FocusAsync();
+
+            typesRendered = true;
+        }
+    }
+
+    private async Task<IEnumerable<TypeModel>> TeraTypeSearch(string value)
+    {
+        return await TypeSearch(value, teraTypeAutocomplete, selectedTeraType);
+    }
+
+    private async Task<IEnumerable<TypeModel>> NaturalTypeOneSearch(string value)
+    {
+        return await TypeSearch(value, typeOneAutocomplete, selectedNaturalTypeOne);
+    }
+
+    private async Task<IEnumerable<TypeModel>> NaturalTypeTwoSearch(string value)
+    {
+        return await TypeSearch(value, typeTwoAutocomplete, selectedNaturalTypeTwo);
+    }
+
+    private async Task<IEnumerable<TypeModel>> TypeSearch(string value, MudAutocomplete<TypeModel> element, TypeModel? selectedType)
+    {
 #pragma warning disable CS8602 // types literally can't be null here
-        if (string.IsNullOrWhiteSpace(value))
+        selectedType = selectedType ?? new TypeModel { Name = "None" };
+
+        var typedType = types.Values.FirstOrDefault(type => type.Name.Equals(value, StringComparison.InvariantCultureIgnoreCase));
+
+        if (typedType != null && selectedType == typedType)
         {
             return types.Values;
         }
+
+        // Fix CS1992
+        await Task.CompletedTask;
 
         return types.Values.Where(type => type.Name?.Contains(value, StringComparison.InvariantCultureIgnoreCase) ?? false);
 #pragma warning restore CS8602
@@ -154,11 +189,7 @@ else
         selectedNaturalTypeOne = types[0];
         selectedNaturalTypeTwo = types[0];
 
-        await teraTypeAutocomplete.SelectOption(types[0]);
-        await typeOneAutocomplete.SelectOption(types[0]);
-        await typeTwoAutocomplete.SelectOption(types[0]);
-
-        await teraTypeAutocomplete.FocusAsync();
+        typesLoaded = true;
     }
 
     private void OnTeraTypeClear()
