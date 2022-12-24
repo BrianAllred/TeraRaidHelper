@@ -17,11 +17,11 @@ else
             type
             of the raid pokemon).</MudText>
         <MudAutocomplete class="mb-3" @ref=teraTypeAutocomplete T="TypeModel" Label="Tera type" SearchFunc="@TypeSearch" Clearable
-            SelectValueOnTab Dense OnClearButtonClick="OnTeraTypeClear" ValueChanged="OnTeraTypeChanged" />
+            SelectValueOnTab Dense OnClearButtonClick="OnTeraTypeClear" ValueChanged="OnTeraTypeChanged" MaxItems=null />
         <MudAutocomplete class="mb-3" @ref=typeOneAutocomplete T="TypeModel" Label="Natural type one" SearchFunc="@TypeSearch" Clearable
-            SelectValueOnTab Dense OnClearButtonClick="OnTypeOneClear" ValueChanged="OnTypeOneChanged" />
+            SelectValueOnTab Dense OnClearButtonClick="OnTypeOneClear" ValueChanged="OnTypeOneChanged" MaxItems=null />
         <MudAutocomplete class="mb-3" @ref=typeTwoAutocomplete T="TypeModel" Label="Natural type two" SearchFunc="@TypeSearch" Clearable
-            SelectValueOnTab Dense OnClearButtonClick="OnTypeTwoClear" ValueChanged="OnTypeTwoChanged" @bind-Disabled=@typeTwoAutocompleteDisabled />
+            SelectValueOnTab Dense OnClearButtonClick="OnTypeTwoClear" ValueChanged="OnTypeTwoChanged" MaxItems=null @bind-Disabled=@typeTwoAutocompleteDisabled />
         @if (recommendedOffensiveTypes == null || recommendedDefensiveTypes == null || notRecommendedOffensiveTypes == null || notRecommendedDefensiveTypes == null)
         {
             <MudText Typo="Typo.body1">Select types above...</MudText>
