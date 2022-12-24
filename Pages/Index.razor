@@ -12,9 +12,6 @@
 }
 else
 {
-        <MudOverlay Visible="loadingRecommendations" DarkBackground Absolute>
-            <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
-        </MudOverlay>
         <MudStack Justify="Justify.FlexStart" Spacing="3">
             <MudText Typo="Typo.h2" GutterBottom="true">Tera Raid Helper</MudText>
             <MudText Typo="Typo.body1" GutterBottom="true">Select the Tera Raid type and at least one natural type (the actual
@@ -26,15 +23,22 @@ else
             SelectValueOnTab Dense OnClearButtonClick="OnTypeOneClear" ValueChanged="OnTypeOneChanged" MaxItems=null />
             <MudAutocomplete class="mb-3" @ref=typeTwoAutocomplete T="TypeModel" Label="Natural type two" SearchFunc="@NaturalTypeTwoSearch" Clearable
             SelectValueOnTab Dense OnClearButtonClick="OnTypeTwoClear" ValueChanged="OnTypeTwoChanged" MaxItems=null @bind-Disabled=@typeTwoAutocompleteDisabled />
-        @if (recommendedOffensiveTypes == null || recommendedDefensiveTypes == null || notRecommendedOffensiveTypes == null || notRecommendedDefensiveTypes == null)
-        {
-            <MudText Typo="Typo.body1">Select types above...</MudText>
-        }
-        else if (loadingRecommendations)
-        {
-            <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
-        }
-        else
+            <MudButton Disabled="@(!typesSelected || loadingRecommendations)" OnClick="GetRecommendedTypes" Variant="Variant.Filled" Color="Color.Primary">
+                @if (!typesSelected)
+                {
+                    <MudText Class="ms-2">Select types above</MudText>
+                }
+                else if (loadingRecommendations)
+                {
+                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate />
+                    <MudText Class="ms-2">Calculating</MudText>
+                }
+                else
+                {
+                    <MudText Class="ms-2">Calculate</MudText>
+                }
+            </MudButton>
+        @if (!(recommendedOffensiveTypes == null || recommendedDefensiveTypes == null || notRecommendedOffensiveTypes == null || notRecommendedDefensiveTypes == null))
         {
             <MudStack Justify="Justify.FlexStart" Spacing="6">
                 <MudGrid Justify="Justify.FlexStart" Spacing="6">
@@ -127,6 +131,14 @@ else
     private bool typesLoaded = false;
     private bool typesRendered = false;
     private bool loadingRecommendations = false;
+
+    private bool typesSelected 
+    {
+        get
+        {
+            return selectedTeraType != types[0] && selectedTeraType != null && selectedNaturalTypeOne != types[0] && selectedNaturalTypeOne != null;
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -227,7 +239,6 @@ else
     private async Task OnTeraTypeChanged(TypeModel model)
     {
         selectedTeraType = model;
-        await GetRecommendedOffensiveTypes();
         await BlurAll();
     }
 
@@ -246,40 +257,40 @@ else
             typeTwoAutocompleteDisabled = false;
         }
 
-        await GetRecommendedDefensiveTypes();
         await BlurAll();
     }
 
     private async Task OnTypeTwoChanged(TypeModel model)
     {
         selectedNaturalTypeTwo = model;
-        await GetRecommendedDefensiveTypes();
         await BlurAll();
+    }
+
+    private async Task GetRecommendedTypes()
+    {
+        loadingRecommendations = true;
+        await GetRecommendedDefensiveTypes();
+        await GetRecommendedOffensiveTypes();
+        loadingRecommendations = false;
     }
 
     private async Task GetRecommendedOffensiveTypes()
     {
-        loadingRecommendations = true;
+        recommendedOffensiveTypes = null;
+        notRecommendedOffensiveTypes = null;
 
         if (selectedTeraType != null && selectedTeraType != types[0])
         {
             recommendedOffensiveTypes = await PokemonService.GetGoodOffensiveTypes(selectedTeraType);
             notRecommendedOffensiveTypes = await PokemonService.GetBadOffensiveTypes(selectedTeraType);
             GenerateOffensiveExplanation();
-            await Task.Delay(1000); // Make sure user notices changes
         }
-        else
-        {
-            recommendedOffensiveTypes = null;
-            notRecommendedOffensiveTypes = null;
-        }
-
-        loadingRecommendations = false;
     }
 
     private async Task GetRecommendedDefensiveTypes()
     {
-        loadingRecommendations = true;
+        recommendedDefensiveTypes = null;
+        notRecommendedDefensiveTypes = null;
 
         if (selectedNaturalTypeOne != null && selectedNaturalTypeTwo != null && selectedNaturalTypeOne != types[0])
         {
@@ -288,15 +299,7 @@ else
             notRecommendedDefensiveTypes = await PokemonService.GetBadDefensiveTypes(selectedNaturalTypeOne,
             selectedNaturalTypeTwo);
             GenerateDefensiveExplanation();
-            await Task.Delay(1000); // Make sure user notices changes
         }
-        else
-        {
-            recommendedDefensiveTypes = null;
-            notRecommendedDefensiveTypes = null;
-        }
-
-        loadingRecommendations = false;
     }
 
     private void GenerateOffensiveExplanation()
