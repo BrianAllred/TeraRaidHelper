@@ -1,25 +1,47 @@
 <!DOCTYPE html>
 <html>
-
-<head>
+  <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>RaidHelper</title>
     <base href="/" />
-    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+      rel="stylesheet"
+    />
     <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
-</head>
+  </head>
 
-<body>
+  <body>
     <div id="app">Loading...</div>
 
     <div id="blazor-error-ui">
-        An unhandled error has occurred.
-        <a href="" class="reload">Reload</a>
-        <a class="dismiss">🗙</a>
+      An unhandled error has occurred.
+      <a href="" class="reload">Reload</a>
+      <a class="dismiss">🗙</a>
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
-</body>
-
+  </body>
+  <script>
+    // https://stackoverflow.com/questions/8335834/how-can-i-hide-the-android-keyboard-using-javascript
+    window.blurAll = () => {
+      setTimeout(() => {
+        let element = document.querySelector(":focus");
+        if (element) {
+          element.setAttribute("readonly", "readonly"); // Force keyboard to hide on input field.
+          element.setAttribute("disabled", "true"); // Force keyboard to hide on textarea field.
+          setTimeout(function () {
+            element.blur(); //actually close the keyboard
+            // Remove readonly attribute after keyboard is hidden.
+            element.removeAttribute("readonly");
+            element.removeAttribute("disabled");
+          }, 100);
+        }
+      }, 250);
+    };
+  </script>
 </html>
