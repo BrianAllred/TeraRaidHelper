@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY RaidHelper.csproj .
 RUN apt-get update -y
-RUN apt-get install -y python3
+RUN apt-get install -y python3 libatomic1
 RUN dotnet workload install wasm-tools
 RUN dotnet restore RaidHelper.csproj
 COPY . .
