@@ -6,10 +6,10 @@ namespace RaidHelper.Utilities;
 
 public static class Extensions
 {
-    public static Task<NamedApiResourceList<T>> GetNextResourcePageAsync<T>(this PokeApiClient client, NamedApiResourceList<T> page)
+    public static Task<NamedApiResourceList<T>> GetNextResourcePageAsync<T>(this PokeApiClient client, string page)
         where T : NamedApiResource
     {
-        var uri = new Uri(page.Next);
+        var uri = new Uri(page);
         var queryParams = HttpUtility.ParseQueryString(uri.Query);
         var offset = int.Parse(queryParams.Get("offset") ?? "0");
         var limit = int.Parse(queryParams.Get("limit") ?? "20");

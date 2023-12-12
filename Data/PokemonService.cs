@@ -14,7 +14,7 @@ public class PokemonService
         var types = (await client.GetResourceAsync(typesPage.Results)).Where(type => type.Pokemon.Count > 0).Select(type => type.ToModel());
         while (!string.IsNullOrEmpty(typesPage.Next))
         {
-            typesPage = await client.GetNextResourcePageAsync(typesPage);
+            typesPage = await client.GetNextResourcePageAsync<Type>(typesPage.Next);
             types = types.Concat((await client.GetResourceAsync(typesPage.Results)).Where(type => type.Pokemon.Count > 0).Select(p => p.ToModel()));
         }
 
