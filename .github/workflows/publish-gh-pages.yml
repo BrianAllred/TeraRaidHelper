@@ -16,9 +16,9 @@ jobs:
       # uses GitHub's checkout action to checkout code form the master branch
       - uses: actions/checkout@v4
 
-      # sets up .NET Core SDK 7
+      # sets up .NET Core SDK 8
       - name: Setup .NET Core SDK
-        uses: actions/setup-dotnet@v4.0.0
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
@@ -42,8 +42,9 @@ jobs:
       - name: Add .nojekyll file
         run: touch release/wwwroot/.nojekyll
 
+      # Publui
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4.5.0
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
           BRANCH: gh-pages
           FOLDER: release/wwwroot
